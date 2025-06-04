@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+
+  targets           Target[]             @relation("CreatedTargets")
+  logs              DailyLog[]
+  targetParticipants TargetParticipant[]  // <--- ini yang kurang
+}
+
+model Target {
+  id          String             @id @default(uuid())
+  title       String
+  surat       String
+  duration    Int
+  startDate   DateTime
+  createdBy   String
+  creator     User               @relation(fields: [createdBy], references: [id], name: "CreatedTargets")
+  participants TargetParticipant[]
+  logs        DailyLog[]
+}
+
+model TargetParticipant {
+  id       String  @id @default(uuid())
+  targetId String
+  userId   String
+  joinedAt DateTime @default(now())
+  target   Target  @relation(fields: [targetId], references: [id])
+  user     User    @relation(fields: [userId], references: [id])
+}
+
+model DailyLog {
+  id          String   @id @default(uuid())
+  targetId    String
+  userId      String
+  date        DateTime
+  isDone      Boolean  @default(false)
+  submittedAt DateTime @default(now())
+  target      Target   @relation(fields: [targetId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
