@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,10 +9,17 @@ async function bootstrap() {
     .setTitle('My API')
     .setDescription('The API documentation for my project')
     .setVersion('1.0')
-    .addBearerAuth() // If using JWT auth
+    .addBearerAuth() 
     .build();
 
-  const api = 'swagger'
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, 
+      forbidNonWhitelisted: true, 
+      transform: true, 
+    }),
+  );
+  const api = 'swagger';
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(api, app, document);
 
