@@ -7,18 +7,23 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
   @Get()
-  findAll(): Promise<User[]> {
+  findAll() {
     return this.userService.findAll();
   }
 
