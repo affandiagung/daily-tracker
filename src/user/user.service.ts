@@ -1,9 +1,14 @@
 // src/user/user.service.ts
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -17,14 +22,21 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  async create(data: CreateUserDto): Promise<User> {
+  async create(data: CreateUserDto){
     try {
-      return await this.prisma.user.create({
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const user = await this.prisma.user.create({
         data: {
           ...data,
-          role: data.role ?? 'user', 
+          password: hashedPassword,
+          role: data.role ?? 'user',
+        },
+        select: {
+          name: true,
+          email:true
         },
       });
+      return user
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
@@ -33,7 +45,9 @@ export class UserService {
         throw new ConflictException('User already exist');
       }
 
-      throw new InternalServerErrorException('Terjadi Kesalahan, silahkan coba lagi');
+      throw new InternalServerErrorException(
+        'Terjadi Kesalahan, silahkan coba lagi',
+      );
     }
   }
 

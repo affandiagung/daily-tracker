@@ -28,8 +28,13 @@ export class UserController {
   }
 
   @Post()
-  create(@Body() body: CreateUserDto): Promise<User> {
-    return this.userService.create(body);
+  async create(@Body() body: CreateUserDto) {
+    const user = await this.userService.create(body); 
+    return {
+      statusCode: 201,
+      message: 'User created successfully',
+      data: user,
+    };
   }
 
   @Put(':id')
