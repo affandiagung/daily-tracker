@@ -11,12 +11,13 @@ async function bootstrap() {
     .addBearerAuth() // If using JWT auth
     .build();
 
+  const api = 'swagger'
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup(api, app, document);
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(
-    `Application is running on: http://localhost:${process.env.PORT}`,
+    `Application is running on: http://localhost:${process.env.PORT} ] \nSwagger documentation is on http://localhost:${process.env.PORT}/${api} `,
   );
 }
 bootstrap();
