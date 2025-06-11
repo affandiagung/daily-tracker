@@ -15,12 +15,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { RoleGuard } from 'src/auth/guard/roles.guard';
 
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RoleGuard('admin', 'user'))
   @ApiBearerAuth()
   @Get()
   findAll() {
