@@ -46,8 +46,10 @@ async function bootstrap() {
     `);
 
   console.log(
-    `Application is running on: http://localhost:${process.env.PORT} ]
-Swagger documentation is on http://localhost:${process.env.PORT}/${api} `,
+    `
+    Application is running on: http://localhost:${process.env.PORT} 
+    Swagger documentation is on http://localhost:${process.env.PORT}/${api} 
+    `,
   );
 }
 bootstrap();
