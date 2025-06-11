@@ -8,6 +8,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from '@prisma/client';
@@ -34,6 +35,7 @@ export class UserController {
   }
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RoleGuard('admin', 'user'))
   async create(@Body() body: CreateUserDto) {
     const user = await this.userService.create(body);
     return {
@@ -44,11 +46,13 @@ export class UserController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard('jwt'), RoleGuard('admin', 'user'))
   update(@Param('id') id: string, @Body() body: UpdateUserDto): Promise<User> {
     return this.userService.update(id, body);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RoleGuard('admin'))
   remove(@Param('id') id: string): Promise<User> {
     return this.userService.remove(id);
   }
