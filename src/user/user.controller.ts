@@ -21,7 +21,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth()
+  @ApiBearerAuth()
   @Get()
   findAll() {
     return this.userService.findAll();
@@ -34,7 +34,7 @@ export class UserController {
 
   @Post()
   async create(@Body() body: CreateUserDto) {
-    const user = await this.userService.create(body); 
+    const user = await this.userService.create(body);
     return {
       statusCode: 201,
       message: 'User created successfully',

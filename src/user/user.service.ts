@@ -15,25 +15,25 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(): Promise<Partial<User>[]> {
-  return this.prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt : true
-    },
-  });
-}
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+  }
 
   async findOne(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
   async findWhere(where: Partial<User>): Promise<User | null> {
-  return this.prisma.user.findFirst({ where });
-}
+    return this.prisma.user.findFirst({ where });
+  }
 
-  async create(data: CreateUserDto){
+  async create(data: CreateUserDto) {
     try {
       const hashedPassword = await bcrypt.hash(data.password, 10);
       const user = await this.prisma.user.create({
@@ -44,10 +44,10 @@ export class UserService {
         },
         select: {
           name: true,
-          email:true
+          email: true,
         },
       });
-      return user
+      return user;
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
