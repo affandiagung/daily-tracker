@@ -16,7 +16,7 @@ async function bootstrap() {
 
   app.use(
     morgan(
-      ':date[web] \t| :method :url \t| :status \t| :res[content-length] - :response-time ms',
+      ':date[web] \t| :method :url \t| :status \t| :res[content-length] - :response-time ms'
     ),
   );
 

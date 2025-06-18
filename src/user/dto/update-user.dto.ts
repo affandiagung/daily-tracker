@@ -1,20 +1,22 @@
-// src/user/dto/update-user.dto.ts
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
+import { IsOptional, IsIn, IsEnum, IsEmail } from 'class-validator';
 
 export class UpdateUserDto {
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
   name?: string;
 
+  @ApiPropertyOptional()
   @IsOptional()
   @IsEmail()
   email?: string;
 
+  @ApiPropertyOptional()
   @IsOptional()
-  @MinLength(6)
   password?: string;
 
   @IsOptional()
-  @IsString()
-  role?: string;
+  @IsEnum(Role, { message: 'Role must be ADMIN or USER' })
+  role?: Role;
 }

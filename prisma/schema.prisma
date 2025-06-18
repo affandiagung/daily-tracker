@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,45 +11,55 @@ datasource db {
 
 model User {
   id        String   @id @default(uuid())
-  name      String
   email     String   @unique
+  name      String
   password  String
-  role      String
+  role      Role     @default(USER)
+  members   Member[]
+  targets   Target[]
   createdAt DateTime @default(now())
+}
 
-  targets           Target[]             @relation("CreatedTargets")
-  logs              DailyLog[]
-  targetParticipants TargetParticipant[]  // <--- ini yang kurang
+model Member {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  progress  Progress[]
+  assignedTargets Target[] @relation("TargetMembers")
 }
 
 model Target {
-  id          String             @id @default(uuid())
-  title       String
-  surat       String
+  id          String   @id @default(uuid())
+  name        String
+  description String?
   duration    Int
   startDate   DateTime
-  createdBy   String
-  creator     User               @relation(fields: [createdBy], references: [id], name: "CreatedTargets")
-  participants TargetParticipant[]
-  logs        DailyLog[]
-}
-
-model TargetParticipant {
-  id       String  @id @default(uuid())
-  targetId String
-  userId   String
-  joinedAt DateTime @default(now())
-  target   Target  @relation(fields: [targetId], references: [id])
-  user     User    @relation(fields: [userId], references: [id])
-}
-
-model DailyLog {
-  id          String   @id @default(uuid())
-  targetId    String
   userId      String
-  date        DateTime
-  isDone      Boolean  @default(false)
-  submittedAt DateTime @default(now())
-  target      Target   @relation(fields: [targetId], references: [id])
   user        User     @relation(fields: [userId], references: [id])
+  members     Member[] @relation("TargetMembers") 
+  progress    Progress[]
+  createdAt   DateTime @default(now())
+}
+
+model Progress {
+  id        String         @id @default(uuid())
+  date      DateTime
+  status    ProgressStatus @default(PENDING)
+  memberId  String
+  targetId  String
+  member    Member         @relation(fields: [memberId], references: [id])
+  target    Target         @relation(fields: [targetId], references: [id])
+
+  @@unique([date, memberId, targetId])
+}
+
+enum ProgressStatus {
+  PENDING
+  DONE
+}
+
+enum Role {
+  ADMIN
+  USER
 }

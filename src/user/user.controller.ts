@@ -9,50 +9,83 @@ import {
   Body,
   UseGuards,
   Header,
+  Req,
+  ForbiddenException,
+  BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RoleGuard } from 'src/auth/guard/roles.guard';
+import { Request } from 'express';
 
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth()
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(AuthGuard('jwt'), RoleGuard('admin', 'user'))
-  @ApiBearerAuth()
+  @UseGuards(RoleGuard('ADMIN'))
   @Get()
-  findAll() {
+  findAll(@Req() request: Request) {
+    const ip = request.ip || request.headers['x-forwarded-for'];
+    console.log('IP Address:', ip);
     return this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<User | null> {
-    return this.userService.findOne(id);
+  async findOne(@Param('id', new ParseUUIDPipe()) id: string){
+    const data = await this.userService.findOne(id);
+    return {
+      statusCode: 200,
+      message: 'success',
+      data,
+    };
   }
 
-  @Post()
-  @UseGuards(AuthGuard('jwt'), RoleGuard('admin', 'user'))
+  
+
+  @UseGuards(RoleGuard('ADMIN'))
   async create(@Body() body: CreateUserDto) {
-    const user = await this.userService.create(body);
+    const data = await this.userService.create(body);
     return {
       statusCode: 201,
       message: 'User created successfully',
-      data: user,
+      data,
     };
   }
 
   @Put(':id')
-  @UseGuards(AuthGuard('jwt'), RoleGuard('admin', 'user'))
-  update(@Param('id') id: string, @Body() body: UpdateUserDto): Promise<User> {
-    return this.userService.update(id, body);
+  @UseGuards(RoleGuard('ADMIN', 'USER'))
+  async update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: UpdateUserDto,
+    @Req() req: any,
+  ) {
+    const isAdmin = req.user?.role === 'ADMIN';
+    const isSelf = req.user?.id === id;
+
+    if (!isAdmin) {
+      if (!isSelf) {
+        throw new ForbiddenException('You can only update your own account');
+      }
+      delete body.role;
+    }
+
+    const data = await this.userService.update(id, body);
+    return {
+      statusCode: 201,
+      message: 'updated',
+      data,
+    };
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'), RoleGuard('admin'))
+  @UseGuards(RoleGuard('admin'))
   remove(@Param('id') id: string): Promise<User> {
     return this.userService.remove(id);
   }
