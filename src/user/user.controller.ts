@@ -38,7 +38,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', new ParseUUIDPipe()) id: string){
+  async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     const data = await this.userService.findOne(id);
     return {
       statusCode: 200,
@@ -47,9 +47,8 @@ export class UserController {
     };
   }
 
-  
-
   @UseGuards(RoleGuard('ADMIN'))
+  @Post()
   async create(@Body() body: CreateUserDto) {
     const data = await this.userService.create(body);
     return {
