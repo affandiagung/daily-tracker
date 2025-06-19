@@ -39,6 +39,7 @@ model Target {
   user        User     @relation(fields: [userId], references: [id])
   members     Member[] @relation("TargetMembers") 
   progress    Progress[]
+  isDeleted   Boolean    @default(false) 
   createdAt   DateTime @default(now())
 }
 
