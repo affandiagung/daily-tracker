@@ -1,8 +1,8 @@
-import { PrismaClient, Role, ProgressStatus } from '@prisma/client';
+import { PrismaClient, Role, ProgressStatus, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
 
+const prisma = new PrismaClient();
 async function main() {
   // Buat Admin
   const password = await bcrypt.hash('adminadmin', 10);
@@ -29,8 +29,8 @@ async function main() {
       role: Role.USER,
       members: {
         create: [
-          { name: 'Anak A' },
-          { name: 'Anak B' },
+          { name: 'UserA' },
+          { name: 'UserB' },
         ],
       },
     },
@@ -42,28 +42,28 @@ async function main() {
   // Buat Target & Assign ke Member
   const target = await prisma.target.create({
     data: {
-      name: 'Sholat 5 Waktu',
+      name: 'Target Mudah Rejeki',
       description: 'Pantau sholat 5 waktu selama 30 hari',
       duration: 30,
       startDate: new Date(),
       userId: user.id,
       members: {
-        connect: user.members.map(m => ({ id: m.id })),
-      },
+        connect: user.members.map((member) => ({ id: member.id })),
+      }
     },
   });
 
-  // Isi progress awal (PENDING)
-  for (const member of user.members) {
-    await prisma.progress.create({
-      data: {
-        date: new Date(), // hari ini
-        status: ProgressStatus.PENDING,
-        memberId: member.id,
-        targetId: target.id,
-      },
-    });
-  }
+  const taskNames = ['Membaca Yasin', 'Membaca Waqiah'];
+  const tasks = await Promise.all(
+    taskNames.map((name) =>
+      prisma.task.create({
+        data: {
+          name,
+          targetId: target.id,
+        },
+      }),
+    ),
+  );
 
   console.log('Seeder selesai ✅');
 }

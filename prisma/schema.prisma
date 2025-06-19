@@ -38,21 +38,32 @@ model Target {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   members     Member[] @relation("TargetMembers") 
-  progress    Progress[]
   isDeleted   Boolean    @default(false) 
   createdAt   DateTime @default(now())
+  tasks       Task[]
+
+  @@unique([name, startDate, userId,isDeleted])
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  name      String
+  targetId  String
+  target    Target   @relation(fields: [targetId], references: [id])
+  progresses Progress[]
 }
 
 model Progress {
-  id        String         @id @default(uuid())
+  id        String   @id @default(uuid())
   date      DateTime
   status    ProgressStatus @default(PENDING)
   memberId  String
-  targetId  String
-  member    Member         @relation(fields: [memberId], references: [id])
-  target    Target         @relation(fields: [targetId], references: [id])
+  member    Member   @relation(fields: [memberId], references: [id])
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  createdAt DateTime @default(now())
 
-  @@unique([date, memberId, targetId])
+  @@unique([date, memberId, taskId])
 }
 
 enum ProgressStatus {
