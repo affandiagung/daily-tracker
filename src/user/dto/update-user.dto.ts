@@ -17,6 +17,7 @@ export class UpdateUserDto {
   password?: string;
 
   @IsOptional()
+  @ApiPropertyOptional({ description: 'Role is required' ,default: 'USER'})
   @IsEnum(Role, { message: 'Role must be ADMIN or USER' })
   role?: Role;
 }

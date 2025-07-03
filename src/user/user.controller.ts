@@ -22,6 +22,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RoleGuard } from 'src/auth/guard/roles.guard';
 import { Request } from 'express';
+import { throwForbidden } from 'src/custom/helper/http.response';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth()
@@ -71,7 +72,7 @@ export class UserController {
 
     if (!isAdmin) {
       if (!isSelf) {
-        throw new ForbiddenException('You can only update your own account');
+        throwForbidden('You can only update your own account');
       }
       delete body.role;
     }
