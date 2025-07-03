@@ -3,10 +3,12 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as morgan from 'morgan';
+import { AllExceptionsFilter } from './custom/helper/http.response';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+   app.useGlobalFilters(new AllExceptionsFilter());
   const config = new DocumentBuilder()
     .setTitle('My API')
     .setDescription('The API documentation for my project')

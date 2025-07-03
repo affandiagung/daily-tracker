@@ -1,4 +1,25 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+
+// Success response
+export function successResponse<T>(
+  data: T,
+  message: string,
+  statusCode: number,
+) {
+  return {
+    message,
+    error: false,
+    statusCode,
+    data,
+  };
+}
 
 // Status Code 400
 export function throwBadRequest(message: string): never {
@@ -79,7 +100,9 @@ export function throwUnprocessableEntity(message: string): never {
 }
 
 // Status Code 500
-export function throwInternalServerError(message: string = 'Internal Server Error'): never {
+export function throwInternalServerError(
+  message: string = 'Internal Server Error',
+): never {
   throw new HttpException(
     {
       message,
@@ -89,4 +112,31 @@ export function throwInternalServerError(message: string = 'Internal Server Erro
     },
     HttpStatus.INTERNAL_SERVER_ERROR,
   );
+}
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const status = exception.getStatus();
+    const exceptionResponse = exception.getResponse();
+
+    const message =
+      typeof exceptionResponse === 'string'
+        ? exceptionResponse
+        : (exceptionResponse as any).message;
+
+    const error =
+      typeof exceptionResponse === 'string'
+        ? 'Terjadi Kesalahan Silahkan coba beberapa saat lagi'
+        : (exceptionResponse as any).error;
+
+    response.status(status).json({
+      statusCode: status,
+      message,
+      error,
+      data: null,
+    });
+  }
 }
