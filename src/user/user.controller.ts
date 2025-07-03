@@ -29,8 +29,8 @@ import { Request } from 'express';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(RoleGuard('ADMIN'))
   @Get()
+  @UseGuards(RoleGuard('ADMIN'))
   findAll(@Req() request: Request) {
     const ip = request.ip || request.headers['x-forwarded-for'];
     console.log('IP Address:', ip);
@@ -38,6 +38,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(RoleGuard('ADMIN'))
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     const data = await this.userService.findOne(id);
     return {
@@ -47,8 +48,8 @@ export class UserController {
     };
   }
 
-  @UseGuards(RoleGuard('ADMIN'))
   @Post()
+  @UseGuards(RoleGuard('ADMIN'))
   async create(@Body() body: CreateUserDto) {
     const data = await this.userService.create(body);
     return {
