@@ -32,10 +32,15 @@ export class UserController {
 
   @Get()
   @UseGuards(RoleGuard('ADMIN'))
-  findAll(@Req() request: Request) {
+  async findAll(@Req() request: Request) {
     const ip = request.ip || request.headers['x-forwarded-for'];
     console.log('IP Address:', ip);
-    return this.userService.findAll();
+    const data = await this.userService.findAll();
+    return {
+      statusCode: 200,
+      message: 'success',
+      data,
+    };
   }
 
   @Get(':id')
