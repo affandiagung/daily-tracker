@@ -16,7 +16,6 @@ export function IsNotPastDate(validationOptions?: ValidationOptions) {
           const now = new Date();
           const inputDate = new Date(value);
 
-          // Set time to 00:00:00 for comparison (optional)
           now.setHours(0, 0, 0, 0);
           inputDate.setHours(0, 0, 0, 0);
 
