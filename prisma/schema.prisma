@@ -17,6 +17,7 @@ model User {
   role      Role     @default(USER)
   members   Member[]
   targets   Target[]
+  isDeleted   Boolean @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -26,6 +27,7 @@ model Member {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   progress  Progress[]
+  isDeleted Boolean  @default(false)
   assignedTargets Target[] @relation("TargetMembers")
 
 }
@@ -39,9 +41,9 @@ model Target {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   members     Member[] @relation("TargetMembers") 
-  isDeleted   Boolean    @default(false) 
   createdAt   DateTime @default(now())
   tasks       Task[]
+  isDeleted   Boolean    @default(false) 
 
   @@unique([name, startDate, userId,isDeleted])
 }
@@ -52,6 +54,7 @@ model Task {
   targetId  String
   target    Target   @relation(fields: [targetId], references: [id])
   progresses Progress[]
+  isDeleted Boolean  @default(false)
 }
 
 model Progress {
@@ -63,6 +66,7 @@ model Progress {
   taskId    String
   task      Task     @relation(fields: [taskId], references: [id])
   createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
 
   @@unique([date, memberId, taskId])
 }

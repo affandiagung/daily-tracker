@@ -9,6 +9,32 @@ export class PrismaService
 {
   async onModuleInit() {
     await this.$connect();
+
+    // Middleware: inject `isDeleted: false` to specific queries
+    this.$use(async (params, next) => {
+      const modelsWithIsDeleted = [
+        'User',
+        'Member',
+        'Target',
+        'Task',
+        'Progress',
+      ];
+
+      if (
+        params.model &&
+        modelsWithIsDeleted.includes(params.model) &&
+        ['findMany', 'findFirst'].includes(params.action)
+      ) {
+        if (!params.args) params.args = {};
+
+        params.args.where = {
+          ...params.args.where,
+          isDeleted: false,
+        };
+      }
+
+      return next(params);
+    });
   }
 
   async onModuleDestroy() {
