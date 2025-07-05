@@ -39,6 +39,27 @@ async function main() {
     },
   });
 
+  // Buat User biasa
+  const quest = await prisma.user.upsert({
+    where: { email: 'quest@quest.com' },
+    update: {},
+    create: {
+      email: 'quest@quest.com',
+      name: 'quest',
+      password,
+      role: Role.USER,
+      members: {
+        create: [
+          { name: 'questA' },
+          { name: 'questB' },
+        ],
+      },
+    },
+    include: {
+      members: true,
+    },
+  });
+
   // Buat Target & Assign ke Member
   const target = await prisma.target.create({
     data: {
