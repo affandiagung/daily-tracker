@@ -7,6 +7,18 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
+  constructor() {
+    super({
+      datasources: {
+        db: {
+          url:
+            process.env.NODE_ENV === 'test'
+              ? process.env.DATABASE_URL_TESTING
+              : process.env.DATABASE_URL,
+        },
+      },
+    });
+  }
   async onModuleInit() {
     await this.$connect();
 

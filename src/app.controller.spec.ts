@@ -16,7 +16,7 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Welcome to Daily Tracker sAPI"', () => {
-      expect(appController.getHello()).toBe('Welcome to Daily Tracker APsI');
+      expect(appController.getHello()).toBe('Welcome to Daily Tracker API');
     });
   });
 });
