@@ -14,95 +14,6 @@ import {
 export class TargetService {
   constructor(private prisma: PrismaService) {}
 
-  async createTarget(userId: string, dto: CreateTargetDto) {
-    const { name, description, duration, startDate, tasks } = dto;
-    const existing = await this.prisma.target.findFirst({
-      where: {
-        userId,
-        name,
-        startDate: new Date(startDate),
-      },
-    });
-
-    if (existing) {
-      throwConflict('Target dengan nama dan tanggal mulai tersebut sudah ada');
-    }
-
-    const members = await this.prisma.member.findMany({ where: { userId } });
-    if (!members.length) {
-      throwBadRequest('Silakan tambahkan minimal 1 member terlebih dahulu');
-    }
-
-    const start = new Date(startDate);
-
-    // using transaction prisma
-    return await this.prisma.$transaction(async (tx) => {
-      // Create the target
-      const target = await tx.target.create({
-        data: {
-          name,
-          description,
-          duration,
-          startDate: new Date(startDate),
-          userId,
-          members: {
-            connect: members.map((m) => ({ id: m.id })),
-          },
-        },
-      });
-
-      // Create tasks
-      const createdTasks = await Promise.all(
-        tasks.map((taskName) =>
-          tx.task.create({
-            data: {
-              name: taskName,
-              targetId: target.id,
-            },
-          }),
-        ),
-      );
-
-      // // TODO: Apakah perlu dibuatkan progress base on tasks?
-      // // Default generate progress base on tasks
-      // const progressData: Prisma.ProgressCreateManyInput[] = [];
-
-      // for (const task of createdTasks) {
-      //   for (const member of members) {
-      //     for (let i = 0; i < duration; i++) {
-      //       const progressDate = new Date(start);
-      //       progressDate.setDate(progressDate.getDate() + i);
-      //       progressDate.setHours(0, 0, 0, 0);
-
-      //       progressData.push({
-      //         date: progressDate,
-      //         status: 'PENDING',
-      //         memberId: member.id,
-      //         taskId: task.id,
-      //         createdAt: new Date(),
-      //       });
-      //     }
-      //   }
-      // }
-
-      // // 4. Simpan progress dengan batching
-      // const batchSize = 100;
-      // const chunks = Array.from(
-      //   { length: Math.ceil(progressData.length / batchSize) },
-      //   (_, i) => progressData.slice(i * batchSize, (i + 1) * batchSize),
-      // );
-
-      // for (const chunk of chunks) {
-      //   await Promise.all(chunk.map((data) => tx.progress.create({ data })));
-      // }
-
-      return {
-        ...target,
-        tasks: createdTasks.map((e) => ({ id: e.id, name: e.name })),
-      };
-    });
-  }
-
   async findAllTargets(userId: string) {
     const targets = await this.prisma.target.findMany({
       where: { userId, isDeleted: false },
@@ -207,18 +118,92 @@ export class TargetService {
     };
   }
 
-  async deleteTarget(userId: string, targetId: string) {
-    console.log(userId, targetId);
-    const target = await this.prisma.target.findUnique({
-      where: { id: targetId, isDeleted: false },
+  async createTarget(userId: string, dto: CreateTargetDto) {
+    const { name, description, duration, startDate, tasks } = dto;
+    const existing = await this.prisma.target.findFirst({
+      where: {
+        userId,
+        name,
+        startDate: new Date(startDate),
+      },
     });
 
-    if (!target) throwNotFound('Target tidak ditemukan');
-    if (target.userId !== userId) throwForbidden('Akses ditolak');
+    if (existing) {
+      throwConflict('Target dengan nama dan tanggal mulai tersebut sudah ada');
+    }
 
-    return this.prisma.target.update({
-      where: { id: targetId },
-      data: { isDeleted: true },
+    const members = await this.prisma.member.findMany({ where: { userId } });
+    if (!members.length) {
+      throwBadRequest('Silakan tambahkan minimal 1 member terlebih dahulu');
+    }
+
+    const start = new Date(startDate);
+
+    // using transaction prisma
+    return await this.prisma.$transaction(async (tx) => {
+      // Create the target
+      const target = await tx.target.create({
+        data: {
+          name,
+          description,
+          duration,
+          startDate: new Date(startDate),
+          userId,
+          members: {
+            connect: members.map((m) => ({ id: m.id })),
+          },
+        },
+      });
+
+      // Create tasks
+      const createdTasks = await Promise.all(
+        tasks.map((taskName) =>
+          tx.task.create({
+            data: {
+              name: taskName,
+              targetId: target.id,
+            },
+          }),
+        ),
+      );
+
+      // // TODO: Apakah perlu dibuatkan progress base on tasks?
+      // // Default generate progress base on tasks
+      // const progressData: Prisma.ProgressCreateManyInput[] = [];
+
+      // for (const task of createdTasks) {
+      //   for (const member of members) {
+      //     for (let i = 0; i < duration; i++) {
+      //       const progressDate = new Date(start);
+      //       progressDate.setDate(progressDate.getDate() + i);
+      //       progressDate.setHours(0, 0, 0, 0);
+
+      //       progressData.push({
+      //         date: progressDate,
+      //         status: 'PENDING',
+      //         memberId: member.id,
+      //         taskId: task.id,
+      //         createdAt: new Date(),
+      //       });
+      //     }
+      //   }
+      // }
+
+      // // 4. Simpan progress dengan batching
+      // const batchSize = 100;
+      // const chunks = Array.from(
+      //   { length: Math.ceil(progressData.length / batchSize) },
+      //   (_, i) => progressData.slice(i * batchSize, (i + 1) * batchSize),
+      // );
+
+      // for (const chunk of chunks) {
+      //   await Promise.all(chunk.map((data) => tx.progress.create({ data })));
+      // }
+
+      return {
+        ...target,
+        tasks: createdTasks.map((e) => ({ id: e.id, name: e.name })),
+      };
     });
   }
 
@@ -235,13 +220,26 @@ export class TargetService {
 
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.description !== undefined) updateData.description = dto.description;
-    if (dto.duration !== undefined) updateData.duration = dto.duration;
-    if (dto.startDate !== undefined)
-      updateData.startDate = new Date(dto.startDate);
+    if (dto.duration) updateData.duration = dto.duration;
 
     return this.prisma.target.update({
       where: { id: targetId },
       data: updateData,
+    });
+  }
+
+  async deleteTarget(userId: string, targetId: string) {
+    console.log(userId, targetId);
+    const target = await this.prisma.target.findUnique({
+      where: { id: targetId, isDeleted: false },
+    });
+
+    if (!target) throwNotFound('Target tidak ditemukan');
+    if (target.userId !== userId) throwForbidden('Akses ditolak');
+
+    return this.prisma.target.update({
+      where: { id: targetId },
+      data: { isDeleted: true },
     });
   }
 }

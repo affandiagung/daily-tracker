@@ -27,8 +27,8 @@ export class UpdateTargetDto {
   @Min(1, { message: 'Duration harus lebih dari 0' })
   duration?: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
+  // @ApiPropertyOptional()
+  // @IsOptional()
+  // @IsDateString()
+  // startDate?: string;
 }
