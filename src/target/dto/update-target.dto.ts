@@ -31,6 +31,4 @@ export class UpdateTargetDto {
   @IsOptional()
   @IsDateString()
   startDate?: string;
-
-
 }
