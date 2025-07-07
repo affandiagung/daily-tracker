@@ -32,7 +32,6 @@ export class TargetController {
 
   @Get()
   async findAll(@Req() req: AuthRequest, @Res() res: Response) {
-    console.log(req.user.id);
     const data = await this.targetService.findAllTargets(req.user.id);
     return res.status(200).json(successResponse(data, 'Success', 200));
   }

@@ -229,7 +229,6 @@ export class TargetService {
   }
 
   async deleteTarget(userId: string, targetId: string) {
-    console.log(userId, targetId);
     const target = await this.prisma.target.findUnique({
       where: { id: targetId, isDeleted: false },
     });

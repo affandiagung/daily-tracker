@@ -79,7 +79,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(RoleGuard('admin'))
+  @UseGuards(RoleGuard('ADMIN'))
   remove(@Param('id') id: string): Promise<User> {
     return this.userService.remove(id);
   }
