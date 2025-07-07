@@ -242,4 +242,61 @@ export class TargetService {
       data: { isDeleted: true },
     });
   }
+
+  async submitProgressToday(memberId: string, taskId: string, userId: string) {
+    const member = await this.prisma.member.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member) {
+      throwNotFound('Member tidak ditemukan');
+    }
+
+    if (member.userId !== userId) {
+      throwForbidden('Akses ditolak: member bukan milik anda');
+    }
+
+    // Ambil task dan targetnya
+    const task = await this.prisma.task.findFirst({
+      where: {
+        id: taskId,
+        isDeleted: false,
+        target: {
+          isDeleted: false,
+          userId: userId, // validasi kepemilikan
+        },
+      },
+      include: {
+        target: true,
+      },
+    });
+
+    if (!task) {
+      throwForbidden('Task tidak valid atau tidak dimiliki oleh user');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const progress = await this.prisma.progress.upsert({
+      where: {
+        date_memberId_taskId: {
+          date: today,
+          memberId,
+          taskId,
+        },
+      },
+      update: {
+        status: 'DONE',
+      },
+      create: {
+        date: today,
+        memberId,
+        taskId,
+        status: 'DONE',
+      },
+    });
+
+    return progress
+  }
 }

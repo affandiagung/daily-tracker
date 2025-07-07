@@ -21,6 +21,8 @@ import { UpdateTargetDto } from './dto/update-target.dto';
 import { AuthRequest } from 'src/custom/interfaces/ auth-request.interface';
 import { successResponse } from 'src/custom/helper/http.response';
 import { Response } from 'express';
+import { AssignTaskDto } from './dto/assign-task.dto';
+import { RequestWithUser } from 'src/custom/interfaces/requestWithUser.interface';
 
 @Controller('targets')
 @ApiBearerAuth()
@@ -74,5 +76,17 @@ export class TargetController {
   ) {
     const data = await this.targetService.deleteTarget(req.user.id, id);
     return res.status(200).json(successResponse(data, 'Success', 200));
+  }
+
+  @Post('/progress')
+  async submitProgress(@Body() body: AssignTaskDto, @Res() res: Response,@Req() req: RequestWithUser) {
+    const data = await this.targetService.submitProgressToday(
+      body.memberId,
+      body.taskId,
+      req.user.id
+    );
+    return res
+      .status(201)
+      .json(successResponse(data, 'Progress berhasil disimpan', 201));
   }
 }
