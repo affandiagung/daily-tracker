@@ -8,20 +8,16 @@ import {
   Param,
   Body,
   UseGuards,
-  Header,
   Req,
-  ForbiddenException,
-  BadRequestException,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Role, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RoleGuard } from 'src/auth/guard/roles.guard';
-import { Request } from 'express';
 import { throwForbidden } from 'src/custom/helper/http.response';
 
 @UseGuards(AuthGuard('jwt'))
@@ -33,8 +29,6 @@ export class UserController {
   @Get()
   @UseGuards(RoleGuard('ADMIN'))
   async findAll(@Req() request: Request) {
-    const ip = request.ip || request.headers['x-forwarded-for'];
-    console.log('IP Address:', ip);
     const data = await this.userService.findAll();
     return {
       statusCode: 200,

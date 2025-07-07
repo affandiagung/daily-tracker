@@ -54,9 +54,7 @@ export class MemberService {
     });
 
     if (usedInProgress) {
-      throw new ForbiddenException(
-        'Member sudah memiliki progress, tidak bisa dihapus',
-      );
+      throwForbidden('Member sudah memiliki progress, tidak bisa dihapus');
     }
 
     return this.prisma.member.update({
