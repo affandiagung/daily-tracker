@@ -5,12 +5,12 @@ import { ValidationPipe } from '@nestjs/common';
 import * as morgan from 'morgan';
 import { AllExceptionsFilter } from './custom/helper/http.response';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
+  const mode = process.env.NODE_ENV === 'test' ? 'TESTING' : 'PRODUCTION';
   const config = new DocumentBuilder()
-    .setTitle('My API')
+    .setTitle(`Daily Tracker API -  ` + mode)
     .setDescription('The API documentation for my project')
     .setVersion('1.0')
     .addBearerAuth()
@@ -18,7 +18,7 @@ async function bootstrap() {
 
   app.use(
     morgan(
-      ':date[web] \t| :method :url \t| :status \t| :res[content-length] - :response-time ms'
+      ':date[web] \t| :method :url \t| :status \t| :res[content-length] - :response-time ms',
     ),
   );
 
@@ -34,6 +34,10 @@ async function bootstrap() {
   SwaggerModule.setup(api, app, document);
 
   await app.listen(process.env.PORT ?? 3000);
+  console.log(
+    `\nServer in mode ${process.env.NODE_ENV === 'test' ? 'TESTING' : 'PRODUCTION'} `,
+  );
+
   console.log(`
     ▓█████▄  ▄▄▄       ██▓ ██▓   ▓██   ██▓   ▄▄▄█████▓ ██▀███   ▄▄▄       ▄████▄   ██ ▄█▀▓█████  ██▀███  
     ▒██▀ ██▌▒████▄    ▓██▒▓██▒    ▒██  ██▒   ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄    ▒██▀ ▀█   ██▄█▒ ▓█   ▀ ▓██ ▒ ██▒
