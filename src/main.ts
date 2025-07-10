@@ -8,6 +8,7 @@ import { AllExceptionsFilter } from './custom/helper/http.response';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.enableCors('*');
   const mode = process.env.NODE_ENV === 'test' ? 'TESTING' : 'PRODUCTION';
   const config = new DocumentBuilder()
     .setTitle(`Daily Tracker API -  ` + mode)
