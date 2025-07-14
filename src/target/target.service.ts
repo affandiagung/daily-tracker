@@ -23,18 +23,25 @@ export class TargetService {
       },
     });
 
-    return targets.map((target) => ({
-      id: target.id,
-      name: target.name,
-      description: target.description,
-      duration: target.duration,
-      startDate: target.startDate,
-      // members: target.members.map((m) => ({
-      //   id: m.id,
-      //   name: m.name,
-      // })),
-      tasks: target.tasks.map((t) => ({ id: t.id, name: t.name })),
-    }));
+    return targets.map((target) => {
+      const todayStart = new Date().setHours(0, 0, 0, 0);
+      const endDate = new Date(target.startDate).setDate(
+        new Date(target.startDate).getDate() + target.duration,
+      );
+      return {
+        id: target.id,
+        name: target.name,
+        description: target.description,
+        duration: target.duration,
+        startDate: target.startDate,
+        status: todayStart < endDate ? 'Sedang Berlangsung' : 'Selesai',
+        // members: target.members.map((m) => ({
+        //   id: m.id,
+        //   name: m.name,
+        // })),
+        tasks: target.tasks.map((t) => ({ id: t.id, name: t.name })),
+      };
+    });
   }
 
   async findOneTarget(id: string) {
@@ -120,11 +127,13 @@ export class TargetService {
 
   async createTarget(userId: string, dto: CreateTargetDto) {
     const { name, description, duration, startDate, tasks } = dto;
+    const localDate = new Date(`${startDate}T00:00:00+07:00`);
+    const utcDate = new Date(localDate.toISOString());
     const existing = await this.prisma.target.findFirst({
       where: {
         userId,
         name,
-        startDate: new Date(startDate),
+        startDate: utcDate,
       },
     });
 
@@ -296,6 +305,6 @@ export class TargetService {
       },
     });
 
-    return progress
+    return progress;
   }
 }
