@@ -9,6 +9,7 @@ import {
   Min,
   ArrayNotEmpty,
   ArrayMinSize,
+  Matches,
 } from 'class-validator';
 import { IsNotPastDate } from 'src/custom/IsNotPastDate';
 
@@ -31,6 +32,9 @@ export class CreateTargetDto {
     type: String,
     description: 'Tanggal mulai target',
     example: '2023-01-01',
+  })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'startDate must be in YYYY-MM-DD format only',
   })
   @IsDateString()
   @IsNotPastDate({ message: 'startDate tidak boleh lebih kecil dari hari ini' })
